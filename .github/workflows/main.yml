@@ -9,44 +9,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout original code
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          path: original_code
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
 
-      - name: God Mode - Create Fresh Environment
-        run: |
-          # 1. Ekdum fresh project banayega (No Gradle Errors)
-          flutter create -t app ultimate_build
-          
-          # 2. Fresh project ka khali 'lib' folder delete karega
-          rm -rf ultimate_build/lib
-          
-          # 3. Tumhara asli 'lib' code aur 'pubspec' wahan copy karega
-          cp -r original_code/lib ultimate_build/
-          cp original_code/pubspec.yaml ultimate_build/
-          
-          # 4. Agar koi assets folder hai toh usko bhi copy karega
-          cp -r original_code/assets ultimate_build/ 2>/dev/null || true
-
       - name: Get dependencies
-        run: |
-          cd ultimate_build
-          flutter pub get
+        run: flutter pub get
 
-      - name: Build APK (Release Mode)
-        run: |
-          cd ultimate_build
-          flutter build apk --release --no-tree-shake-icons
+      - name: Build APK
+        run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Upload The Final APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Edition-X-Release-APK
-          path: ultimate_build/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           
