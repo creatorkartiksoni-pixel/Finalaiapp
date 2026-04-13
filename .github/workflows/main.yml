@@ -3,19 +3,19 @@ name: Build Edition X APK
 on:
   push:
     branches:
-      - main  # Agar tumhari branch ka naam 'master' hai toh yahan master likhna
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0' # Latest stable version
+          flutter-version: '3.19.0'
 
       - name: Get dependencies
         run: flutter pub get
@@ -24,8 +24,9 @@ jobs:
         run: flutter build apk --release
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Edition-X-Release-APK
           path: build/app/outputs/flutter-apk/app-release.apk
+          
 
