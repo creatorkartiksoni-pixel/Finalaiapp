@@ -1,0 +1,44 @@
+name: smart_pan_hub
+description: "Smart-PAN Hub Edition X - The Ultimate Mesh Network Dashboard"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Connectivity & Mesh Networking
+  connectivity_plus: ^5.0.2
+  network_info_plus: ^4.0.2
+
+  # Device Identity & Hardware Specs
+  device_info_plus: ^9.1.1
+  battery_plus: ^5.0.2
+
+  # Permissions Master (Android 13/14 support)
+  permission_handler: ^11.3.0
+
+  # AI Knowledge Base
+  webview_flutter: ^4.4.2
+
+  # Ghost Overlay & UI Enhancements
+  flutter_local_notifications: ^16.3.2
+  get_it: ^7.6.7
+
+  # Icons
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Assets section removed as per request. 
+  # Future mein jab image fix ho jaye, tab yahan add kar sakte hain.
