@@ -13,11 +13,7 @@ dependencies:
 
   # Connectivity & Mesh Networking
   connectivity_plus: ^5.0.2
-  network_info_plus: ^4.0.2
-  permissions:
-  contents: read
-  actions: read
-  packages: read
+  network_info_plus: ^4.0.
 
   # Device Identity & Hardware Specs
   device_info_plus: ^9.1.1
