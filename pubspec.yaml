@@ -1,4 +1,4 @@
-name: smart_pan_hub
+name: smart_pan_hub # Use lowercase with underscores
 description: "Smart-PAN Hub Edition X - The Ultimate Mesh Network Dashboard"
 publish_to: 'none'
 
@@ -13,7 +13,7 @@ dependencies:
 
   # Connectivity & Mesh Networking
   connectivity_plus: ^5.0.2
-  network_info_plus: ^4.0.
+  network_info_plus: ^4.0.2 # Fixed: Added missing patch version
 
   # Device Identity & Hardware Specs
   device_info_plus: ^9.1.1
@@ -35,10 +35,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^3.0.0 # Recommended for cleaner code
 
 flutter:
   uses-material-design: true
-
-  # Assets section removed as per request. 
-  # Future mein jab image fix ho jaye, tab yahan add kar sakte hain.
+  
