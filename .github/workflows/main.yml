@@ -1,4 +1,6 @@
-name: Build Edition X (Ultimate Auto-Fix)
+# Flutter Build Workflow
+
+name: Build Flutter APK
 
 on:
   push:
@@ -8,64 +10,47 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          java-package: jdk
+          java-architecture: x64
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
 
       - name: Install Flutter
-        uses: subosito/flutter-action@v2
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable --depth 1
+          export PATH=`pwd`/flutter/bin:$PATH
+
+      - name: Flutter Pub Get
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
         with:
-          flutter-version: '3.19.0'
+          name: flutter-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Pre-Build Health Check
+      - name: Fallback Build Strategy
         run: |
-          flutter doctor -v || true
-          # Agar android folder missing hai, toh basic structure create karna
-          if [ ! -d "android" ]; then
-            flutter create . --platforms android --force
+          if [ ! -f build/app/outputs/flutter-apk/app-release.apk ]; then
+            echo 'Fallback: Rebuilding APK'
+            flutter build apk --debug;
           fi
-
-      - name: Auto-Fix: Stripping Pubspec Assets
-        run: |
-          echo "🧹 Cleaning pubspec.yaml from missing assets..."
-          # Assets aur Fonts ki saari lines ko uda dena taaki file missing error na aaye
-          sed -i '/assets:/d' pubspec.yaml
-          sed -i '/fonts:/d' pubspec.yaml
-          sed -i '/- assets\//d' pubspec.yaml
-          sed -i '/- images\//d' pubspec.yaml
-          sed -i '/\.png/d' pubspec.yaml
-          sed -i '/\.jpg/d' pubspec.yaml
-
-      - name: Install Dependencies
-        run: flutter pub get || true
-
-      - name: Build APK (Strategy 1: Release)
-        id: build_release
-        continue-on-error: true
-        run: |
-          flutter build apk --release --no-tree-shake-icons
-          if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
-            echo "success=true" >> $GITHUB_OUTPUT
-            echo "path=build/app/outputs/flutter-apk/app-release.apk" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Build APK (Strategy 2: Debug Fallback)
-        if: steps.build_release.outputs.success != 'true'
-        id: build_debug
-        continue-on-error: true
-        run: |
-          flutter build apk --debug
-          if [ -f build/app/outputs/flutter-apk/app-debug.apk ]; then
-            echo "success=true" >> $GITHUB_OUTPUT
-            echo "path=build/app/outputs/flutter-apk/app-debug.apk" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload Final APK
-        if: steps.build_release.outputs.success == 'true' || steps.build_debug.outputs.success == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Edition-X-Built-APK
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/app-debug.apk
-            
+          
