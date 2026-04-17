@@ -77,5 +77,11 @@ class RobotIntroOverlay extends StatelessWidget {
         ),
       ),
     );
-  }
+  }child: Image.asset(
+  'assets/Mono.robo',
+  fit: BoxFit.cover,
+  errorBuilder: (context, error, stackTrace) {
+    return Icon(Icons.robot, size: 100, color: PanStyle.neonCyan);
+  },
+),
 }
