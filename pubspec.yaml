@@ -18,6 +18,9 @@ dependencies:
   # Device Identity & Hardware Specs
   device_info_plus: ^9.1.1
   battery_plus: ^5.0.2
+  flutter:
+  uses-material-design: true
+  # Remove assets: and fonts: sections completely
 
   # Permissions Master (Android 13/14 support)
   permission_handler: ^11.3.0
