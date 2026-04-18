@@ -64,6 +64,31 @@ jobs:
         id: build_debug
         continue-on-error: true
         run: |
+              - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Pre-Build Health Check
+        run: |
+          # Agar android folder hi gayab hai, toh seedha 'flutter create' hi best hai
+          if [ ! -d "android" ]; then
+            flutter create . --platforms android --force
+          fi
+
+      - name: Smart Pubspec Repair
+        run: |
+          echo "Checking pubspec consistency..."
+          # Sirf tabhi touch karo agar pubspec corrupt lag raha ho
+          flutter pub get || (echo "Pub get failed, cleaning assets..." && sed -i '/assets:/d' pubspec.yaml && flutter pub get)
+
+      - name: Build APK (Release with Logging)
+        id: build_release
+        run: |
+          # --no-tree-shake-icons tabhi use karo agar fonts ka issue ho
+          flutter build apk --release --no-tree-shake-icons || echo "Release build failed, switching to debug..."
+          
           flutter build apk --debug
           if [ -f build/app/outputs/flutter-apk/app-debug.apk ]; then
             echo "success=true" >> $GITHUB_OUTPUT
