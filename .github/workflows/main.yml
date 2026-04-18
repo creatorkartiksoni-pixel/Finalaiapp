@@ -12,33 +12,41 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
+          cache: true
 
       - name: Pre-Build Health Check
         run: |
           flutter doctor -v || true
-          # Agar android folder missing hai, toh basic structure create karna
+          # Agar android folder missing hai, toh flutter khud generate karega
           if [ ! -d "android" ]; then
             flutter create . --platforms android --force
           fi
 
-            - name: Auto-Fix Generate Missing Files
+      - name: Auto-Fix Generate Missing Files
         run: |
           echo "🔧 Auto-fixing missing Android files..."
-          # Error yahan tha: mkdir command ko sahi format mein likhna zaroori hai
           mkdir -p android/app/src/main/res/values || true
-          # Check if AndroidManifest.xml exists, if not create a dummy one
+          
+          # Check if AndroidManifest.xml exists, if not create a basic one
           if [ ! -f "android/app/src/main/AndroidManifest.xml" ]; then
             echo "Creating basic AndroidManifest..."
             mkdir -p android/app/src/main/
-            echo '<manifest xmlns:android="http://schemas.xml/apk/res/android" package="com.example.editionx"></manifest>' > android/app/src/main/AndroidManifest.xml
+            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.editionx"></manifest>' > android/app/src/main/AndroidManifest.xml
           fi
           
           echo "🧹 Cleaning pubspec.yaml from missing assets..."
-          # Assets aur Fonts ki saari lines ko uda dena taaki file missing error na aaye
+          # Sab kuch uda rahe ho, par yaad rakhna images nahi dikhengi app mein
           sed -i '/assets:/d' pubspec.yaml
           sed -i '/fonts:/d' pubspec.yaml
           sed -i '/- assets\//d' pubspec.yaml
@@ -56,7 +64,6 @@ jobs:
           flutter build apk --release --no-tree-shake-icons
           if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
             echo "success=true" >> $GITHUB_OUTPUT
-            echo "path=build/app/outputs/flutter-apk/app-release.apk" >> $GITHUB_OUTPUT
           fi
 
       - name: Build APK (Strategy 2: Debug Fallback)
@@ -64,35 +71,9 @@ jobs:
         id: build_debug
         continue-on-error: true
         run: |
-              - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Pre-Build Health Check
-        run: |
-          # Agar android folder hi gayab hai, toh seedha 'flutter create' hi best hai
-          if [ ! -d "android" ]; then
-            flutter create . --platforms android --force
-          fi
-
-      - name: Smart Pubspec Repair
-        run: |
-          echo "Checking pubspec consistency..."
-          # Sirf tabhi touch karo agar pubspec corrupt lag raha ho
-          flutter pub get || (echo "Pub get failed, cleaning assets..." && sed -i '/assets:/d' pubspec.yaml && flutter pub get)
-
-      - name: Build APK (Release with Logging)
-        id: build_release
-        run: |
-          # --no-tree-shake-icons tabhi use karo agar fonts ka issue ho
-          flutter build apk --release --no-tree-shake-icons || echo "Release build failed, switching to debug..."
-          
           flutter build apk --debug
           if [ -f build/app/outputs/flutter-apk/app-debug.apk ]; then
             echo "success=true" >> $GITHUB_OUTPUT
-            echo "path=build/app/outputs/flutter-apk/app-debug.apk" >> $GITHUB_OUTPUT
           fi
 
       - name: Upload Final APK
@@ -103,4 +84,5 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/flutter-apk/app-debug.apk
-            
+          if-no-files-found: warn
+          
