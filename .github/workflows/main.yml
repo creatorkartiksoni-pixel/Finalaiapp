@@ -76,13 +76,12 @@ jobs:
             echo "success=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Upload Final APK
-        if: steps.build_release.outputs.success == 'true' || steps.build_debug.outputs.success == 'true'
+            - name: Upload Final APK
         uses: actions/upload-artifact@v4
         with:
           name: Edition-X-Built-APK
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: warn
+          # Yahan '*' use karne se jo bhi APK bani hogi wo utha li jayegi
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+          
           
